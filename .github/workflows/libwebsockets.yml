@@ -3,9 +3,10 @@ name: libwebsockets Tests
 # START OF COMMON SECTION
 on:
   push:
-    branches: [ 'master', 'main', 'release/**' ]
-  pull_request:
-    branches: [ '*' ]
+#    branches: [ 'master', 'main', 'release/**' ]
+    branches: [ 'test' ]
+#  pull_request:
+#    branches: [ '*' ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,26 +45,20 @@ jobs:
         with:
           sparse-checkout: |
               .github
-      - name: Retrieving OpenSSL from cache
-        uses: actions/cache/restore@v4
-        id: openssl-cache
-        with:
-          path: |
-            openssl-source
-            openssl-install
-          key: ossl-depends-${{ matrix.openssl_ref }}-${{ github.sha }}
-          fail-on-cache-miss: true
 
-      - name: Retrieving wolfSSL/wolfProvider from cache
+      - name: Retrieving wolfProvider from cache
         uses: actions/cache/restore@v4
-        id: wolfprov-cache
+        id: wolfprov-cache-restore
         with:
           path: |
+            scripts
             wolfssl-source
             wolfssl-install
             wolfprov-install
+            openssl-install
             provider.conf
-          key: wolfprov-${{ matrix.wolfssl_ref }}-${{ github.sha }}
+
+          key: wolfprov-${{ matrix.wolfssl_ref }}-${{ matrix.openssl_ref }}-${{ github.sha }}
           fail-on-cache-miss: true
 
       - name: Install libwebsockets dependencies
@@ -91,9 +86,7 @@ jobs:
         working-directory: libwebsockets
         run: |
           echo "Setting environment variables..."
-          export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/wolfssl-install/lib:$GITHUB_WORKSPACE/openssl-install/lib64
-          export OPENSSL_CONF=$GITHUB_WORKSPACE/provider.conf
-          export OPENSSL_MODULES=$GITHUB_WORKSPACE/wolfprov-install/lib
+          source $GITHUB_WORKSPACE/scripts/env-setup
           export ${{ matrix.force_fail }}
 
           ./build/bin/libwebsockets-test-server --port=11111 --ssl > server.log 2>&1 & SERVER_PID=$!
