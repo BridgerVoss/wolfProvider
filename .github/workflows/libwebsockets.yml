@@ -91,7 +91,7 @@ jobs:
 
           ./build/bin/libwebsockets-test-server --port=11111 --ssl > server.log 2>&1 & SERVER_PID=$!
           sleep 5
-          timeout 60 ./build/bin/libwebsockets-test-client 127.0.0.1 --port=11111 --ssl > client.log 2>&1 || echo "Client exited with error $?"
+          timeout 10 ./build/bin/libwebsockets-test-client 127.0.0.1 --port=11111 --ssl > client.log 2>&1 || echo "Client exited with error $?"
 
           ldd ./build/bin/libwebsockets-test-server | grep wolfProvider
           ldd ./build/bin/libwebsockets-test-client | grep wolfProvider
