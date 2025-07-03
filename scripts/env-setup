@@ -13,6 +13,7 @@ if [ $is_sourced -eq 0 ]; then
     exit 1
 fi
 
+
 if [ -n "$BASH_SOURCE" ]; then
     SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 elif [ -n "$ZSH_VERSION" ]; then
